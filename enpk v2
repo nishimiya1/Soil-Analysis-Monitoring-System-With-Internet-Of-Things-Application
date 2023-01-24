@@ -1,0 +1,108 @@
+#include <SoftwareSerial.h>
+#include <Wire.h>
+
+// RE and DE Pins set the RS485 module
+// to Receiver or Transmitter mode
+#define RE 8
+#define DE 7
+
+// Modbus RTU requests for reading NPK values
+const byte nitro[] = {0x01,0x03, 0x00, 0x1e, 0x00, 0x02, 0xe4, 0x0c};
+const byte phos[] = {0x01,0x03, 0x00, 0x1f, 0x00, 0x02, 0xb5, 0xcc};
+const byte pota[] = {0x01,0x03, 0x00, 0x20, 0x00, 0x02, 0x85, 0xc0};
+
+// A variable used to store NPK values
+unsigned int values[3];
+
+// Sets up a new SoftwareSerial object
+// Digital pins 10 and 11 should be used with a Mega or Mega 2560
+SoftwareSerial mod(2, 3);
+//SoftwareSerial mod(10, 11);
+ 
+void setup() {
+  // Set the baud rate for the Serial port
+  Serial.begin(9600);
+
+  // Set the baud rate for the SerialSoftware object
+  mod.begin(9600);
+
+  // Define pin modes for RE and DE
+  pinMode(RE, OUTPUT);
+  pinMode(DE, OUTPUT);
+  
+  delay(500);
+}
+ 
+void loop() {
+  // Read values
+  values[0] = nitrogen();
+  delay(250);
+  values[1] = phosphorous();
+  delay(250);
+  values[2] = potassium();
+  delay(250);
+
+  // Print values to the serial monitor
+  Serial.print("Nitrogen: ");
+  Serial.print(values[0]);
+  Serial.println(" mg/kg");
+  Serial.print("Phosphorous: ");
+  Serial.print(values[1]);
+  Serial.println(" mg/kg");
+  Serial.print("Potassium: ");
+  Serial.print(values[2]);
+  Serial.println(" mg/kg");
+  
+  delay(2000);
+}
+ 
+unsigned int nitrogen(){
+  digitalWrite(DE,HIGH);
+  digitalWrite(RE,HIGH);
+  delay(10);
+  if(mod.write(nitro,sizeof(nitro))==8){
+    digitalWrite(DE,LOW);
+    digitalWrite(RE,LOW);
+    byte highByte = mod.read();
+    byte lowByte = mod.read();
+    if (result == node.ku8MBSuccess)
+  {
+    Serial.print("   Nitrogen: ");
+    Serial.print(word(node.getResponseBuffer(0x0), node.getResponseBuffer(0x1)));
+    Serial.println(" mg/kg");
+  }
+
+  }
+}
+ 
+unsigned int phosphorous(){
+  digitalWrite(DE,HIGH);
+  digitalWrite(RE,HIGH);
+  delay(10);
+  if(mod.write(phos,sizeof(phos))==8){
+    digitalWrite(DE,LOW);
+    digitalWrite(RE,LOW);
+    byte highByte = mod.read();
+    byte lowByte = mod.read();
+    unsigned int value = word(highByte,lowByte);
+    Serial.print(value);
+    Serial.println();
+    return value;
+  }
+}
+
+unsigned int potassium(){
+  digitalWrite(DE,HIGH);
+  digitalWrite(RE,HIGH);
+  delay(10);
+  if(mod.write(pota,sizeof(pota))==8){
+    digitalWrite(DE,LOW);
+    digitalWrite(RE,LOW);
+    byte highByte = mod.read();
+    byte lowByte = mod.read();
+    unsigned int value = word(highByte,lowByte);
+    Serial.print(value);
+    Serial.println();
+    return value;
+  }
+}
