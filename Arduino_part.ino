@@ -100,7 +100,7 @@ byte nLast,pLast,kLast;
 void moistureReading(){
   String irrigation;
   int moistureRead = analogRead(moisturePin);
-  int moisture = (1.0 - ((moistureRead - 200.0) / 823.0)) * 100.0;
+  int moisture = ( 100 - ( (moistureRead/1023.00) * 100 ) );
   Serial.println(moisture);
 
   if(moisture < 20 || moisture > 32){
