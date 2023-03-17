@@ -1,53 +1,60 @@
-# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
-# SPDX-License-Identifier: MIT
+
 import RPi.GPIO as GPIO
 import time
 import board
 import adafruit_dht
 import pyrebase
 import serial
+config = {
+  "apiKey": "",
+  "authDomain": "",
+  "databaseURL": "",
+  "storageBucket": ""
+}
 
-moisture_sensor_pin = 21
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(moisture_sensor_pin, GPIO.IN)
+firebase = pyrebase.initialize_app(config)
 
-# Initial the dht device, with data pin connected to:
+db = firebase.database()
+
+
 dhtDevice = adafruit_dht.DHT11(board.D4)
 
-# you can pass DHT22 use_pulseio=False if you wouldn't like to use pulseio.
-# This may be necessary on a Linux single board computer like the Raspberry Pi,
-# but it will not work in CircuitPython.
+
 dhtDevice = adafruit_dht.DHT11(board.D4, use_pulseio=False)
 from w1thermsensor import W1ThermSensor
 
 sensor = W1ThermSensor()
-#def read_moisture_sensor():
- # moisture_sensor_value = 0
-  # Read moisture sensor value multiple times and take the average
-  #for i in range(10):
-   # moisture_sensor_value += GPIO.input(moisture_sensor_pin)
-  #moisture_sensor_value = moisture_sensor_value / 10
-  #return moisture_sensor_value
+
+
+if __name__ == '__main__':
+    ser = serial.Serial('/dev/ttyUSB0',9600, timeout =1)
+    ser.flush()
 while True:
+    n = ser.readline().decode('utf-8').rstrip()
+    p = ser.readline().decode('utf-8').rstrip()
+    k = ser.readline().decode('utf-8').rstrip()
+    moisture = ser.readline().decode('utf-8').rstrip()
+    irrigation = ser.readline().decode('utf-8').rstrip()
     try:
-        #moisture_sensor_value = read_moisture_sensor()
-        #moisture_percent = moisture_sensor_value * 100
-        # Print the values to the serial port
-        #line = ser.readline().decode('utf-8').rstrip()
         soiltemp = sensor.get_temperature()
         temperature_c = dhtDevice.temperature
         temperature_f = temperature_c * (9 / 5) + 32
         humidity = dhtDevice.humidity
         print(
-            "Temp: {:.1f} F / {:.1f} C    Humidity: {}% Soil Temperature: {}%  ".format(
-                temperature_f, temperature_c, humidity,soiltemp
+            "Temp: {:.1f} F / {:.1f} C    Humidity: {}% Soil Temperature: {} C Nitrogen: {} ppm/kg Phosphorus: {} ppm/kg Potassium: {} ppm/kg Soil Moisture: {} % Irrigation Status: {} ".format(
+                temperature_f, temperature_c,humidity,soiltemp, n,p,k,moisture,irrigation
             )
         )
+       
         data = {
-        "Temperature" : temperature_c,
-        "Humidity" : humidity,
-        "Soil Temperature" : soiltemp,
-       # "Soil Moisture" : moisture_percent
+         "Temperature" : temperature_c,
+         "Humidity" : humidity,
+         "SoilTemperature" : soiltemp,
+         "Nitrogen" : n,
+         "Phosphorus" : p,
+         "Potassium" : k,
+         "SoilMoisture" : moisture,
+         "Irrigation" : irrigation
         
         }
         db.child("Status").push(data)
