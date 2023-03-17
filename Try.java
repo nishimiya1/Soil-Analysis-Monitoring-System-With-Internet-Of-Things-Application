@@ -13,7 +13,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class Try extends AppCompatActivity {
-    TextView temp,umid,soyl,moyst,nitrogen,phos,potassium;
+    TextView temp,umid,soyl,moyst,nitrogen,phos,potassium,irrigation;
     DatabaseReference reference;
     String status;
 
@@ -33,7 +33,7 @@ public class Try extends AppCompatActivity {
         nitrogen = findViewById(R.id.nitroText);
         phos = findViewById(R.id.phospoText);
         potassium = findViewById(R.id.potassiumText);
-
+        irrigation = findViewById(R.id.irrigationStatus);
 
 
         reference = FirebaseDatabase.getInstance().getReference();
@@ -54,6 +54,8 @@ public class Try extends AppCompatActivity {
                 phos.setText(status);
                 status = snapshot.child("Potassium").getValue().toString();
                 potassium.setText(status);
+                status = snapshot.child("Irrigation").getValue().toString();
+                irrigation.setText(status);
             }
 
             @Override
