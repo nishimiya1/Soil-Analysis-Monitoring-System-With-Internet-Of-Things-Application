@@ -5,12 +5,24 @@ import board
 import adafruit_dht
 import pyrebase
 import serial
+import csv
 config = {
   "apiKey": "",
   "authDomain": "",
   "databaseURL": "",
   "storageBucket": ""
 }
+
+with open('soil_data_day1_no_fert.csv', 'w', new):
+  writer.writerow(['time', 
+                   'nitrogen', 
+                   'phosphorus', 
+                   'potassium', 
+                   'soil_m', 
+                   'temp', 
+                   'soil_temp', 
+                   'humidity', 
+                   'irrigation'])
 
 firebase = pyrebase.initialize_app(config)
 
@@ -19,7 +31,7 @@ db = firebase.database()
 
 dhtDevice = adafruit_dht.DHT11(board.D4)
 
-
+gfg
 dhtDevice = adafruit_dht.DHT11(board.D4, use_pulseio=False)
 from w1thermsensor import W1ThermSensor
 
@@ -29,6 +41,7 @@ sensor = W1ThermSensor()
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyUSB0',9600, timeout =1)
     ser.flush()
+t0 = time.time()    
 while True:
     n = ser.readline().decode('utf-8').rstrip()
     p = ser.readline().decode('utf-8').rstrip()
@@ -61,6 +74,19 @@ while True:
 
         db.update(data)
         print("Sent to Firebase")
+        
+        if round(time.time()-t0, 1) % 60 == 0:
+          print(f'hello record na akooo! time: {time.time()-t0}')
+          with open('soil_data_day1_no_fert.csv', 'w', new):
+            writer.writerows([((time.time()-t0)/60), 
+                              n, 
+                              p,
+                              k, 
+                              moisture, 
+                              temperature_c, 
+                              soiltemp,
+                              humidity, 
+                              irrigation])  
 
     except RuntimeError as error:
         # Errors happen fairly often, DHT's are hard to read, just keep going
