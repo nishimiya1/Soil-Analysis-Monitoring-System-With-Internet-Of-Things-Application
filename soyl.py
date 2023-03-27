@@ -12,8 +12,8 @@ config = {
   "databaseURL": "",
   "storageBucket": ""
 }
-
-with open('soil_data_day1_no_fert.csv', 'w', new):
+csv_name = 'soil_data_day1_no_fert.csv'
+with open(csv_name, 'w', new):
   writer.writerow(['time', 
                    'nitrogen', 
                    'phosphorus', 
@@ -77,7 +77,7 @@ while True:
         
         if round(time.time()-t0, 1) % 60 == 0:
           print(f'hello record na akooo! time: {time.time()-t0}')
-          with open('soil_data_day1_no_fert.csv', 'w', new):
+          with open(csv_name, 'w', new):
             writer.writerows([((time.time()-t0)/60), 
                               n, 
                               p,
