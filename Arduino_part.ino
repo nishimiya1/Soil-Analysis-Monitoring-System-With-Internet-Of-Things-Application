@@ -103,7 +103,7 @@ void moistureReading(){
   int moisture = ( 100 - ( (moistureRead/1023.00) * 100 ) );
   Serial.println(moisture);
 
-  if(moisture < 20 || moisture > 32){
+  if(moisture < 30){
     irrigation = "on";
     digitalWrite(relayPin,HIGH);
     Serial.println(irrigation);
