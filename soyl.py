@@ -7,14 +7,14 @@ import pyrebase
 import serial
 import csv
 config = {
-  "apiKey": "",
-  "authDomain": "",
-  "databaseURL": "",
-  "storageBucket": ""
+  "apiKey": "GLYZ3rfUD8H3xUxO9KcN34s1rTZ55JOtgE0FETSU",
+  "authDomain": "iot-soil-moisure-monitoring.firebaseapp.com",
+  "databaseURL": "https://iot-soil-moisure-monitoring-default-rtdb.firebaseio.com/",
+  "storageBucket": "iot-soil-moisure-monitoring.appspot.com"
 }
 
 t0 = time.time()
-csv_name = 'soil_data_test.csv'
+csv_name = 'soil_data_irrigation_test.csv'
 
 firebase = pyrebase.initialize_app(config)
 
@@ -22,15 +22,15 @@ db = firebase.database()
 
 
 # Initial the dht device, with data pin connected to:
-dhtDevice = adafruit_dht.DHT11(board.D4)
+#dhtDevice = adafruit_dht.DHT11(board.D4)
 
 # you can pass DHT22 use_pulseio=False if you wouldn't like to use pulseio.
 # This may be necessary on a Linux single board computer like the Raspberry Pi,
 # but it will not work in CircuitPython.
-dhtDevice = adafruit_dht.DHT11(board.D4, use_pulseio=False)
-#from w1thermsensor import W1ThermSensor
+#dhtDevice = adafruit_dht.DHT11(board.D4, use_pulseio=False)
+from w1thermsensor import W1ThermSensor
 
-#sensor = W1ThermSensor()
+sensor = W1ThermSensor()
 
 
 if __name__ == '__main__':
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     ser.flush()
     
 csv = open(csv_name, 'w')
-csv.write("time, soil_m, temp, humidity, irrigation \n")
+csv.write("time, soil_temp, soil_m, irrigation \n")
 csv.close
 
 i = 0
@@ -47,34 +47,34 @@ while True:
     
     i += 2
     
-    #n = ser.readline().decode('utf-8').rstrip()
-    #p = ser.readline().decode('utf-8').rstrip()
-    #k = ser.readline().decode('utf-8').rstrip()
+    n = ser.readline().decode('utf-8').rstrip()
+    p = ser.readline().decode('utf-8').rstrip()
+    k = ser.readline().decode('utf-8').rstrip()
     moisture = ser.readline().decode('utf-8').rstrip()
     irrigation = ser.readline().decode('utf-8').rstrip()
     try:
-        #soiltemp = sensor.get_temperature()
+        soiltemp = sensor.get_temperature()
         temperature_c = dhtDevice.temperature
         temperature_f = temperature_c * (9 / 5) + 32
         humidity = dhtDevice.humidity
-       # print(
-        #    "Temp: {:.1f} F / {:.1f} C    Humidity: {}% Soil Temperature: {} C Nitrogen: {} ppm/kg Phosphorus: {} ppm/kg Potassium: {} ppm/kg Soil Moisture: {} % Irrigation Status: {} ".format(
-         #       temperature_f, temperature_c,humidity,soiltemp, n,p,k,moisture,irrigation
-          #  )
-        #)
+        print(
+            "Temp: {:.1f} F / {:.1f} C    Humidity: {}% Soil Temperature: {:.2f} C Nitrogen: {} ppm/kg Phosphorus: {} ppm/kg Potassium: {} ppm/kg Soil Moisture: {} % Irrigation Status: {} ".format(
+                temperature_f, temperature_c,humidity,soiltemp, n,p,k,moisture,irrigation
+            )
+        )
         print (
-            "Temp: {:.1f} F / {:.1f} C    Humidity: {}% Soil Moisture: {} % Irrigation Status: {} ".format(
-                temperature_f, temperature_c,humidity, moisture, irrigation
+            " Soil Temperature: {} % Soil Moisture: {} % Irrigation: {} ".format(
+                 soiltemp, moisture, irrigation
                 )
             )
        
         data = {
          "Temperature" : temperature_c,
          "Humidity" : humidity,
-         #"SoilTemperature" : soiltemp,
-         #"Nitrogen" : n,
-         #"Phosphorus" : p,
-         #"Potassium" : k,
+         "SoilTemperature" : soiltemp,
+         "Nitrogen" : n,
+         "Phosphorus" : p,
+         "Potassium" : k,
          "SoilMoisture" : moisture,
          "Irrigation" : irrigation
         
@@ -86,9 +86,9 @@ while True:
         
         if i % 60 == 0:
           print(f'hello record na akooo! time: {time.time()-t0}')
-          time_time = int((time.time()-t0)/60)
+          time_time = float((time.time()-t0)/60)
           csv = open(csv_name, 'a')
-          csv.write(f"{time_time}, {moisture}, {temperature_c}, {humidity}, {irrigation} \n")
+          csv.write(f"{time_time}, {soiltemp}, {moisture}, {irrigation} \n")
           csv.close()
     
 
