@@ -120,7 +120,7 @@ void setup() {
   Serial.begin(9600);
 
   mod.begin(4800);
-
+  pinMode(relayPin, OUTPUT);
   pinMode(RE, OUTPUT);
   pinMode(DE, OUTPUT);
 
