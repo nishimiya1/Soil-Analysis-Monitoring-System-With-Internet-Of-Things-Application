@@ -87,23 +87,20 @@ byte nLast,pLast,kLast;
     
   }
 
-  Serial.print("Nitrogen: ");
-  Serial.print(n);
-  Serial.println(" mg/kg");
-  Serial.print("Phosphorous: ");
-  Serial.print(p);
-  Serial.println(" mg/kg");
-  Serial.print("Potassium: ");
-  Serial.print(k);
-  Serial.println(" mg/kg");
+  
+  Serial.println(n);
+  Serial.println(p);
+  Serial.println(k);
+  delay(1000);
 }
 void moistureReading(){
+
   String irrigation;
   int moistureRead = analogRead(moisturePin);
-  int moisture = ( 100 - ( (moistureRead/1023.00) * 100 ) );
+  int moisture = map(moistureRead, 0, 1023, 0, 100);
   Serial.println(moisture);
-
-  if(moisture < 30){
+  delay(1000);
+  if(moisture < 45){
     irrigation = "on";
     digitalWrite(relayPin,HIGH);
     Serial.println(irrigation);
@@ -111,7 +108,7 @@ void moistureReading(){
   else{
     irrigation = "off";
     digitalWrite(relayPin,LOW);
-    Serial.print(irrigation);
+    Serial.println(irrigation);
   }
 }
 
@@ -134,7 +131,7 @@ void setup() {
 unsigned long currentTime;
 unsigned long previousCheckTime = 0;
 
-const unsigned long sensorReadInterval = 350UL;
+const unsigned long sensorReadInterval = 1350UL;
 
 void loop() {
 
@@ -142,11 +139,11 @@ void loop() {
 
   if (currentTime - previousCheckTime >= sensorReadInterval) {
 
-    delay(350);
+    delay(1350);
     n = nitrogen();
-    delay(350);
+    delay(1350);
     p = phosphorous();
-    delay(350);
+    delay(1350);
     k = potassium();
 
     showResult();
